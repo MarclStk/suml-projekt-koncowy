@@ -47,8 +47,9 @@ def run_app():
         initial_sidebar_state="expanded"
     )
 
-    if "page" in st.query_params:
-        page = st.query_params["page"]
+    params = st.experimental_get_query_params()
+    if "page" in params:
+        page = params["page"][0]
     else:
         page = "prediction"
 
