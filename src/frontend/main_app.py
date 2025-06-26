@@ -96,7 +96,6 @@ def run_app():
     try:
         services["dataset_loader"].prepare_train_test_data()
         if not services["model_service"].load_model():
-            st.info("Training a new model. This may take a moment...")
             services["model_service"].train_model()
     except Exception as e:
         st.error(f"Error initializing model: {str(e)}")
