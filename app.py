@@ -1,0 +1,8 @@
+
+import os
+import streamlit as st
+from src.frontend.main_app import run_app
+
+
+if __name__ == "__main__":
+    run_app()
