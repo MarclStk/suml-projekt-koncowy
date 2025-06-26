@@ -51,7 +51,6 @@ IF NOT EXIST "models\best_model.joblib" (
     )
 )
 
-start "" http://localhost:8501
 py -m streamlit run app.py
 
 CALL .venv\Scripts\deactivate.bat
