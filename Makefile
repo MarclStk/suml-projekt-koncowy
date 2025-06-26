@@ -7,6 +7,6 @@ hf-login:
 	huggingface-cli login --token $(HF) --add-to-git-credential
 
 push-hub:
-	huggingface-cli upload MrclStk/suml-projekt-koncowy . --repo-type=space --commit-message="Full deploy" --token $(HF)
+	huggingface-cli upload MrclStk/LapiMate . --repo-type=space --commit-message="Full deploy" --token $(HF)
 
 deploy: hf-login push-hub
