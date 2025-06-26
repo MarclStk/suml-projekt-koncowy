@@ -1,18 +1,14 @@
-
 import streamlit as st
 import pandas as pd
 from typing import Dict, Any
 
-from src.backend.domain.models import PredictionHistory
 
 
 def render_comparison(services: Dict[str, Any], df: pd.DataFrame):
-
     st.header("Compare Laptops")
-    
-    if not st.session_state.comparison_laptops:
-        st.info("No laptops added for comparison yet. Add laptops from the prediction page first.")
 
+    if not st.session_state.get("comparison_laptops"):
+        st.info("No laptops added for comparison yet. Add laptops from the prediction page first.")
         if st.button("Go to Price Prediction"):
             st.session_state.page = "Price Prediction"
             st.experimental_rerun()
@@ -22,15 +18,14 @@ def render_comparison(services: Dict[str, Any], df: pd.DataFrame):
 
     comparison_data = []
     for entry in st.session_state.comparison_laptops:
-        if hasattr(entry, 'specification'):
-            spec = entry.specification
-            price_info = f"{entry.price_prediction.currency} {entry.price_prediction.predicted_price:.2f}"
-            category_name = entry.category.name
-        else:
-            spec = entry
-            price_info = "Not predicted"
-            category_name = "Unknown"
-        
+        spec = entry.specification if hasattr(entry, 'specification') else entry
+        price_info = (
+            f"{entry.price_prediction.currency} {entry.price_prediction.predicted_price:.2f}"
+            if hasattr(entry, 'price_prediction') else
+            "Not predicted"
+        )
+        category_name = entry.category.name if hasattr(entry, 'category') else "Unknown"
+
         comparison_data.append({
             "Company": spec.company,
             "Product": spec.product,
@@ -46,41 +41,39 @@ def render_comparison(services: Dict[str, Any], df: pd.DataFrame):
             "Weight": f"{spec.weight} kg"
         })
 
-    if comparison_data:
-        df_comparison = pd.DataFrame(comparison_data)
-        st.dataframe(df_comparison, use_container_width=True)
+    df_comparison = pd.DataFrame(comparison_data)
+    st.dataframe(df_comparison, use_container_width=True)
 
-        st.subheader("Visual Comparison")
+    st.subheader("Visual Comparison")
 
-        features_to_compare = st.multiselect(
-            "Select features to compare visually",
-            ["RAM", "Screen Size", "Weight"],
-            default=["RAM"]
-        )
-        
-        if features_to_compare:
-            chart_data = {}
-            
-            for feature in features_to_compare:
-                if feature == "RAM":
-                    chart_data[feature] = [entry.specification.ram for entry in st.session_state.comparison_laptops]
-                elif feature == "Screen Size":
-                    chart_data[feature] = [entry.specification.screen_size for entry in st.session_state.comparison_laptops]
-                elif feature == "Weight":
-                    chart_data[feature] = [entry.specification.weight for entry in st.session_state.comparison_laptops]
+    features_to_compare = st.multiselect(
+        "Select features to compare visually",
+        ["RAM", "Screen Size", "Weight"],
+        default=["RAM"]
+    )
 
-            labels = [f"{entry.specification.company} {entry.specification.product}" for entry in st.session_state.comparison_laptops]
+    if features_to_compare:
+        labels = []
+        chart_data = {feat: [] for feat in features_to_compare}
 
-            for feature, values in chart_data.items():
-                chart_df = pd.DataFrame({
-                    "Laptop": labels,
-                    feature: values
-                })
+        for entry in st.session_state.comparison_laptops:
+            spec = entry.specification if hasattr(entry, 'specification') else entry
+            labels.append(f"{spec.company} {spec.product}")
 
-                st.bar_chart(chart_df.set_index("Laptop"))
+            if "RAM" in chart_data:
+                chart_data["RAM"].append(spec.ram)
+            if "Screen Size" in chart_data:
+                chart_data["Screen Size"].append(spec.screen_size)
+            if "Weight" in chart_data:
+                chart_data["Weight"].append(spec.weight)
 
-        if st.button("Clear Comparison"):
-            st.session_state.comparison_laptops = []
-            st.experimental_rerun()
-    else:
-        st.info("No laptops selected for comparison.")
+        for feature, values in chart_data.items():
+            chart_df = pd.DataFrame({
+                "Laptop": labels,
+                feature: values
+            })
+            st.bar_chart(chart_df.set_index("Laptop"))
+
+    if st.button("Clear Comparison"):
+        st.session_state.comparison_laptops = []
+        st.experimental_rerun()
