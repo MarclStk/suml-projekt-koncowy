@@ -4,11 +4,11 @@ emoji: 🚀
 colorFrom: red
 colorTo: red
 sdk: docker
-app_port: 8501
-tags:
-  - streamlit
+app_file: app.py
 pinned: false
 license: apache-2.0
+tags:
+  - streamlit
 ---
 
 # LapiMate 💻
