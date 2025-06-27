@@ -141,10 +141,8 @@ def run_app():
                     st.session_state.app_state["showing_prediction"] = True
                     st.session_state.app_state["form_submitted"] = True
 
-                if action == "predict":
                     save_to_history(laptop_spec, price_prediction, category)
 
-                if action == "predict":
                     recommendations = services["recommendation_service"].get_similar_laptops(laptop_spec)
                     st.session_state.app_state["recommendations"] = recommendations
 
