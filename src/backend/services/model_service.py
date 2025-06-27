@@ -22,6 +22,7 @@ class ModelService:
         os.makedirs(self.model_dir, exist_ok=True)
 
     def train_model(self, model_type: str = "random_forest") -> Dict[str, float]:
+        print(f"Training model {model_type}")
         X_train, X_test, y_train, y_test, feature_names = self.dataset_loader.prepare_train_test_data()
 
         if model_type == "linear":
@@ -131,7 +132,10 @@ class ModelService:
     def predict_price(self, laptop_spec: LaptopSpecification) -> PricePrediction:
         if self.model is None:
             if not self.load_model():
-                self.train_model()
+                raise ValueError("Model not found. Please ensure the model has been trained first.")
+
+        model_type = type(self.model).__name__
+        print(f"Making prediction using model: {model_type}")
 
         input_data = {
             "company": laptop_spec.company,

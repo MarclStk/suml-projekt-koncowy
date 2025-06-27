@@ -19,12 +19,36 @@ from src.frontend.components.comparison import render_comparison
 
 
 def initialize_services():
-    dataset_loader = DatasetLoader()
+    model_dir = '/tmp'
 
-    model_service = ModelService(dataset_loader=dataset_loader)
+    if "dataset_loader" not in st.session_state:
+        dataset_loader = DatasetLoader()
+        df = dataset_loader.load_data()
+        dataset_loader.prepare_train_test_data()
+        st.session_state["dataset_loader"] = dataset_loader
+    else:
+        dataset_loader = st.session_state["dataset_loader"]
+
+    if "model_service" not in st.session_state:
+        model_service = ModelService(model_dir=model_dir, dataset_loader=dataset_loader)
+
+        if model_service.load_model():
+            st.session_state["model_trained"] = True
+        else:
+            with st.spinner("Training new model... This may take a moment..."):
+                try:
+                    model_info = model_service.find_best_model()
+                    st.toast(f"Model trained successfully! {model_info['model_type']} (R²: {model_info['r2']:.4f})")
+                    st.session_state["model_info"] = model_info
+                except Exception as e:
+                    st.error(f"Error training model: {str(e)}")
+                    st.session_state["training_error"] = str(e)
+        
+        st.session_state["model_service"] = model_service
+    else:
+        model_service = st.session_state["model_service"]
 
     recommendation_service = RecommendationService(dataset_loader)
-
     currency_service = CurrencyService()
     
     return {
@@ -43,13 +67,7 @@ def run_app():
         initial_sidebar_state="expanded"
     )
 
-    params = st.experimental_get_query_params()
-    if "page" in params:
-        page = params["page"][0]
-    else:
-        page = "prediction"
-
-    st.title("LapiMate 💻")
+    st.title("LapiMate")
     st.markdown("""
     **Predict laptop prices based on specifications and find the best options for your needs.**
     
@@ -89,13 +107,6 @@ def run_app():
 
     df = services["dataset_loader"].load_data()
 
-    try:
-        services["dataset_loader"].prepare_train_test_data()
-        if not services["model_service"].load_model():
-            services["model_service"].train_model()
-    except Exception as e:
-        st.error(f"Error initializing model: {str(e)}")
-
     selected_page, currency = render_sidebar(services["currency_service"])
     st.session_state.current_currency = currency
 
@@ -114,10 +125,10 @@ def run_app():
                     if laptop_spec not in st.session_state.comparison_laptops:
                         st.session_state.comparison_laptops.append(laptop_spec)
 
-                    st.success(f"✅ {laptop_spec.company} {laptop_spec.product} added to comparison!")
+                    st.success(f"{laptop_spec.company} {laptop_spec.product} added to comparison!")
 
                     if len(st.session_state.comparison_laptops) > 1:
-                        st.info("🔍 Go to 'Compare Laptops' to view comparison.")
+                        st.info("Go to 'Compare Laptops' to view comparison.")
 
                 if action == "predict":
                     price_prediction = services["model_service"].predict_price(laptop_spec)

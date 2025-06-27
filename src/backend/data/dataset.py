@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from typing import Dict, List, Tuple, Any
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 
 
@@ -17,18 +17,10 @@ class DatasetLoader:
 
     def load_data(self) -> pd.DataFrame:
         try:
-            self.df = pd.read_csv(self.file_path)
+            encoding = "windows-1250"
+            self.df = pd.read_csv(self.file_path, encoding=encoding)
         except UnicodeDecodeError:
-            encodings = ['latin1', 'cp1250', 'cp1252', 'ISO-8859-1', 'ISO-8859-2']
-            for encoding in encodings:
-                try:
-                    self.df = pd.read_csv(self.file_path, encoding=encoding)
-                    print(f"Udało się wczytać plik: {encoding}")
-                    break
-                except UnicodeDecodeError:
-                    continue
-            else:
-                raise ValueError(f"Nie udało się wczytać pliku. Wypróbowano kodowania: {encodings}")
+            raise ValueError(f"Nie udało się wczytać pliku. Wypróbowano kodowanie {encoding}")
 
         column_mapping = {
             'laptop_ID': 'laptop_id',
@@ -100,25 +92,17 @@ class DatasetLoader:
         X_num = X[num_cols]
 
         self.encoders = {}
-        X_cat_encoded_list = []
+        X_cat_encoded = np.zeros((X.shape[0], len(cat_cols)))
 
-        for col in cat_cols:
-            try:
-                encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-            except TypeError:
-                encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
-            col_encoded = encoder.fit_transform(X_cat[[col]])
+        for i, col in enumerate(cat_cols):
+            encoder = LabelEncoder()
+            X_cat_encoded[:, i] = encoder.fit_transform(X_cat[col].fillna('unknown'))
+
             self.encoders[col] = {
                 'encoder': encoder,
-                'categories': encoder.categories_[0].tolist(),
-                'feature_names': [f"{col}_{cat}" for cat in encoder.categories_[0]]
+                'categories': encoder.classes_.tolist(),
+                'mapping': {cat: idx for idx, cat in enumerate(encoder.classes_)}
             }
-            X_cat_encoded_list.append(col_encoded)
-
-        if X_cat_encoded_list:
-            X_cat_encoded = np.hstack(X_cat_encoded_list)
-        else:
-            X_cat_encoded = np.array([]).reshape(X.shape[0], 0)
 
         self.scaler = StandardScaler()
         X_num_scaled = self.scaler.fit_transform(X_num)
@@ -127,7 +111,7 @@ class DatasetLoader:
 
         feature_names = num_cols.copy()
         for col in cat_cols:
-            feature_names.extend(self.encoders[col]['feature_names'])
+            feature_names.append(f"{col}_id")
 
         X_train, X_test, y_train, y_test = train_test_split(
             X_combined, y, test_size=test_size, random_state=random_state
@@ -136,26 +120,21 @@ class DatasetLoader:
         return X_train, X_test, y_train, y_test, feature_names
 
     def transform_input_data(self, input_data: Dict[str, Any]) -> np.ndarray:
-
         num_data = []
         for col in ['screen_size', 'ram', 'weight']:
             num_data.append(input_data.get(col, 0))
 
-        num_scaled = self.scaler.transform([num_data])[0]
+        num_df = pd.DataFrame([num_data], columns=['screen_size', 'ram', 'weight'])
+        num_scaled = self.scaler.transform(num_df)[0]
 
-        cat_encoded_list = []
-        for col in ['company', 'product', 'type', 'screen_resolution', 'cpu', 'gpu', 'operating_system']:
+        cat_cols = ['company', 'product', 'type', 'screen_resolution', 'cpu', 'gpu', 'operating_system']
+        cat_encoded = np.zeros(len(cat_cols))
+        
+        for i, col in enumerate(cat_cols):
             if col in self.encoders:
                 value = input_data.get(col, '')
-
-                encoder = self.encoders[col]['encoder']
-                encoded = encoder.transform([[value]])[0]
-                cat_encoded_list.append(encoded)
-
-        if cat_encoded_list:
-            cat_encoded = np.hstack(cat_encoded_list)
-        else:
-            cat_encoded = np.array([])
+                mapping = self.encoders[col]['mapping']
+                cat_encoded[i] = mapping.get(value, 0)
 
         X_combined = np.hstack([num_scaled, cat_encoded])
 

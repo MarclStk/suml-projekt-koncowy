@@ -1,5 +1,3 @@
-
-import os
 import streamlit as st
 from src.frontend.main_app import run_app
 
