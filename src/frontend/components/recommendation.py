@@ -57,7 +57,7 @@ def render_recommendations(recommendations: List[RecommendedLaptop], currency: s
 
             if st.button(f"Compare", key=f"compare_{i}"):
                 if laptop not in st.session_state.comparison_laptops:
-                    from src.backend.domain.models import PredictionHistory, PricePrediction, LaptopCategory
+                    from src.backend.domain.models import PredictionHistory, PricePrediction
                     from datetime import datetime
                     
                     entry = PredictionHistory(
@@ -66,9 +66,6 @@ def render_recommendations(recommendations: List[RecommendedLaptop], currency: s
                         price_prediction=PricePrediction(
                             predicted_price=laptop.actual_price,
                             currency=currency
-                        ),
-                        category=LaptopCategory.categorize(
-                            laptop.specifications, laptop.actual_price
                         )
                     )
                     

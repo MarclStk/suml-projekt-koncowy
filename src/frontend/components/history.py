@@ -2,20 +2,18 @@
 import streamlit as st
 from datetime import datetime
 
-from src.backend.domain.models import LaptopSpecification, PricePrediction, LaptopCategory, PredictionHistory
+from src.backend.domain.models import LaptopSpecification, PricePrediction, PredictionHistory
 
 
 def save_to_history(
     laptop_spec: LaptopSpecification,
-    price_prediction: PricePrediction,
-    category: LaptopCategory
+    price_prediction: PricePrediction
 ):
 
     history_entry = PredictionHistory(
         timestamp=datetime.now(),
         specification=laptop_spec,
-        price_prediction=price_prediction,
-        category=category
+        price_prediction=price_prediction
     )
 
     st.session_state.prediction_history.append(history_entry)
@@ -35,7 +33,6 @@ def render_history():
     for i, entry in enumerate(reversed(st.session_state.prediction_history)):
         with st.expander(f"{entry.specification.company} {entry.specification.product}"):
             st.write(f"**Price:** {entry.price_prediction.currency} {entry.price_prediction.predicted_price:.2f}")
-            st.write(f"**Category:** {entry.category.name}")
 
             st.write("**Key Specs:**")
             st.write(f"- CPU: {entry.specification.cpu}")

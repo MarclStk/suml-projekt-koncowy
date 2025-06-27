@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
 from datetime import datetime
@@ -34,29 +33,11 @@ class PricePrediction:
 
 
 @dataclass
-class LaptopCategory:
-    name: str
-    description: str
-
-    @classmethod
-    def categorize(cls, specs: LaptopSpecification, price: float) -> "LaptopCategory":
-        if "gaming" in specs.type_name.lower() or "gaming" in specs.product.lower():
-            return cls(name="Gaming", description="Designed for high-performance gaming")
-        elif price > 1500 or "premium" in specs.product.lower():
-            return cls(name="Premium", description="High-end performance and build quality")
-        elif price < 700:
-            return cls(name="Budget", description="Affordable with basic functionality")
-        else:
-            return cls(name="Mainstream", description="Good balance of performance and price")
-
-
-@dataclass
 class PredictionHistory:
     id: UUID = field(default_factory=uuid4)
     timestamp: datetime = field(default_factory=datetime.now)
     specification: LaptopSpecification = None
     price_prediction: PricePrediction = None
-    category: LaptopCategory = None
 
 
 @dataclass

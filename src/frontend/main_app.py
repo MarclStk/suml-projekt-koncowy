@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Dict, Any
 import os
 
-from src.backend.domain.models import LaptopSpecification, LaptopCategory, PricePrediction
+from src.backend.domain.models import LaptopSpecification, PricePrediction
 from src.backend.data.dataset import DatasetLoader
 from src.backend.services.model_service import ModelService
 from src.backend.services.recommendation_service import RecommendationService
@@ -141,23 +141,20 @@ def run_app():
                             st.session_state.current_currency, conversion_rate
                         )
 
-                    category = LaptopCategory.categorize(laptop_spec, price_prediction.predicted_price)
-
                     st.session_state.current_prediction = {
                         "laptop_spec": laptop_spec,
-                        "price_prediction": price_prediction,
-                        "category": category
+                        "price_prediction": price_prediction
                     }
 
                     st.session_state.app_state["showing_prediction"] = True
                     st.session_state.app_state["form_submitted"] = True
 
-                    save_to_history(laptop_spec, price_prediction, category)
+                    save_to_history(laptop_spec, price_prediction)
 
                     recommendations = services["recommendation_service"].get_similar_laptops(laptop_spec)
                     st.session_state.app_state["recommendations"] = recommendations
 
-                    render_prediction_results(price_prediction, category)
+                    render_prediction_results(price_prediction)
 
                     st.markdown("---")
                     render_recommendations(recommendations, price_prediction.currency)
@@ -166,4 +163,4 @@ def run_app():
             render_history()
     
     elif selected_page == "Compare Laptops":
-        render_comparison(services, df)
+        render_comparison()

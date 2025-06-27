@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 
 
-def render_comparison(services: Dict[str, Any], df: pd.DataFrame):
+def render_comparison():
     st.header("Compare Laptops")
 
     if not st.session_state.get("comparison_laptops"):
@@ -24,14 +24,12 @@ def render_comparison(services: Dict[str, Any], df: pd.DataFrame):
             if hasattr(entry, 'price_prediction') else
             "Not predicted"
         )
-        category_name = entry.category.name if hasattr(entry, 'category') else "Unknown"
 
         comparison_data.append({
             "Company": spec.company,
             "Product": spec.product,
             "Type": spec.type_name,
             "Price": price_info,
-            "Category": category_name,
             "Screen Size": f"{spec.screen_size}\"",
             "Resolution": spec.screen_resolution,
             "CPU": spec.cpu,
