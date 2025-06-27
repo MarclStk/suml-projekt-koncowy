@@ -8,7 +8,6 @@ from src.backend.domain.models import LaptopSpecification, LaptopCategory, Price
 from src.backend.data.dataset import DatasetLoader
 from src.backend.services.model_service import ModelService
 from src.backend.services.recommendation_service import RecommendationService
-from src.backend.services.pdf_service import PDFService
 from src.backend.services.currency_service import CurrencyService
 
 from src.frontend.components.sidebar import render_sidebar
@@ -26,15 +25,12 @@ def initialize_services():
 
     recommendation_service = RecommendationService(dataset_loader)
 
-    pdf_service = PDFService()
-
     currency_service = CurrencyService()
     
     return {
         "dataset_loader": dataset_loader,
         "model_service": model_service,
         "recommendation_service": recommendation_service,
-        "pdf_service": pdf_service,
         "currency_service": currency_service
     }
 
@@ -114,7 +110,7 @@ def run_app():
                 price_prediction = st.session_state.current_prediction["price_prediction"]
                 category = st.session_state.current_prediction["category"]
 
-                render_prediction_results(laptop_spec, price_prediction, category, services["pdf_service"])
+                render_prediction_results(price_prediction, category)
 
                 if st.session_state.app_state["recommendations"]:
                     st.markdown("---")
@@ -172,7 +168,7 @@ def run_app():
                     recommendations = services["recommendation_service"].get_similar_laptops(laptop_spec)
                     st.session_state.app_state["recommendations"] = recommendations
 
-                    render_prediction_results(laptop_spec, price_prediction, category, services["pdf_service"])
+                    render_prediction_results(price_prediction, category)
 
                     st.markdown("---")
                     render_recommendations(recommendations, price_prediction.currency)

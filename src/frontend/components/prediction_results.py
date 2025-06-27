@@ -3,14 +3,11 @@ import os
 import streamlit as st
 
 from src.backend.domain.models import LaptopSpecification, PricePrediction, LaptopCategory
-from src.backend.services.pdf_service import PDFService
 
 
 def render_prediction_results(
-    laptop_spec: LaptopSpecification,
     price_prediction: PricePrediction,
-    category: LaptopCategory,
-    pdf_service: PDFService
+    category: LaptopCategory
 ):
 
     st.subheader("Prediction Results")
