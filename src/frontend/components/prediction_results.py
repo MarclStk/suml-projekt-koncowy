@@ -23,13 +23,6 @@ def render_prediction_results(
         <p style="color: #dddddd;">Category: <strong style="color: #ffffff;">{category.name}</strong> - {category.description}</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    if price_prediction.confidence_interval:
-        lower, upper = price_prediction.confidence_interval
-        st.markdown(f"""
-        <div style="text-align: center; margin-top: 10px; color: #dddddd;">
-            <p>Price range: {price_prediction.currency} {lower:.2f} - {price_prediction.currency} {upper:.2f}</p>
-        </div>
-        """, unsafe_allow_html=True)
+
 
     st.markdown("---")
