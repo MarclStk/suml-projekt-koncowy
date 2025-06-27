@@ -112,8 +112,9 @@ def run_app():
             if st.session_state.app_state["showing_prediction"] and st.session_state.current_prediction["laptop_spec"]:
                 laptop_spec = st.session_state.current_prediction["laptop_spec"]
                 price_prediction = st.session_state.current_prediction["price_prediction"]
+                category = st.session_state.current_prediction["category"]
 
-                render_prediction_results(laptop_spec, price_prediction)
+                render_prediction_results(laptop_spec, price_prediction, category, services["pdf_service"])
 
                 if st.session_state.app_state["recommendations"]:
                     st.markdown("---")
@@ -125,6 +126,7 @@ def run_app():
             showing_saved = show_saved_prediction()
 
             form_result = None
+            laptop_spec = None
 
             if not showing_saved:
                 form_result = render_prediction_form(df, services["dataset_loader"])
@@ -170,7 +172,7 @@ def run_app():
                     recommendations = services["recommendation_service"].get_similar_laptops(laptop_spec)
                     st.session_state.app_state["recommendations"] = recommendations
 
-                    render_prediction_results(laptop_spec, price_prediction)
+                    render_prediction_results(laptop_spec, price_prediction, category, services["pdf_service"])
 
                     st.markdown("---")
                     render_recommendations(recommendations, price_prediction.currency)

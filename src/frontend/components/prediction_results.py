@@ -7,8 +7,10 @@ from src.backend.services.pdf_service import PDFService
 
 
 def render_prediction_results(
+    laptop_spec: LaptopSpecification,
     price_prediction: PricePrediction,
     category: LaptopCategory,
+    pdf_service: PDFService
 ):
 
     st.subheader("Prediction Results")
@@ -31,3 +33,40 @@ def render_prediction_results(
         """, unsafe_allow_html=True)
 
     st.markdown("---")
+    col1, col2 = st.columns([1, 4])
+
+    with col1:
+        try:
+            pdf_path = pdf_service.generate_report(
+                laptop_spec=laptop_spec,
+                price_prediction=price_prediction,
+                category=category
+            )
+
+            st.session_state.app_state["last_action"] = "pdf_download"
+
+            with open(pdf_path, "rb") as pdf_file:
+                pdf_data = pdf_file.read()
+
+            st.download_button(
+                label="📄 Generate & Download PDF",
+                data=pdf_data,
+                file_name=f"laptop_prediction_{laptop_spec.product.replace(' ', '_')}.pdf",
+                mime="application/pdf",
+                key="generate_download_pdf_btn"
+            )
+
+        except Exception as e:
+            st.error(f"Error with PDF: {str(e)}")
+            if "Permission denied" in str(e):
+                st.info("💡 Try closing any open PDF files and try again.")
+            elif "No such file" in str(e):
+                st.info("💡 The output directory might be missing. Trying to create it...")
+                os.makedirs("outputs", exist_ok=True)
+                st.info("Please try again.")
+            else:
+                st.info("💡 This could be a temporary issue. Try refreshing the page.")
+
+
+    with col2:
+        st.info("Export the prediction to a PDF report for sharing or future reference.")
