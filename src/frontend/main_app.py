@@ -116,7 +116,7 @@ def run_app():
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            form_result = render_prediction_form(df, services["dataset_loader"])
+            form_result = render_prediction_form(df)
 
             if form_result:
                 action, laptop_spec = form_result

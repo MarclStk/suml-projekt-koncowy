@@ -7,7 +7,7 @@ from src.backend.domain.models import LaptopSpecification
 from src.backend.data.dataset import DatasetLoader
 
 
-def render_prediction_form(df: pd.DataFrame, dataset_loader: DatasetLoader) -> Optional[LaptopSpecification]:
+def render_prediction_form(df: pd.DataFrame) -> Optional[LaptopSpecification]:
 
     st.header("Predict Laptop Price")
     st.markdown("Enter the specifications of the laptop you're interested in:")
@@ -45,8 +45,8 @@ def render_prediction_form(df: pd.DataFrame, dataset_loader: DatasetLoader) -> O
 
             try:
                 screen_sizes = safe_get_options('screen_size', [13.0, 17.0], numeric=True)
-                min_screen = min(screen_sizes) if screen_sizes and screen_sizes[0] != "Not Available" else 13.0
-                max_screen = max(screen_sizes) if screen_sizes and screen_sizes[0] != "Not Available" else 17.0
+                min_screen = min(screen_sizes)
+                max_screen = max(screen_sizes)
             except Exception:
                 min_screen, max_screen = 13.0, 17.0
                 
@@ -72,12 +72,7 @@ def render_prediction_form(df: pd.DataFrame, dataset_loader: DatasetLoader) -> O
                         except (ValueError, TypeError):
                             pass
 
-                    cleaned_ram = sorted(set(cleaned_ram))
-                    
-                    if cleaned_ram:
-                        ram_values = cleaned_ram
-                    else:
-                        ram_values = [4, 8, 16, 32]
+                    ram_values = sorted(set(cleaned_ram))
                 else:
                     ram_values = [4, 8, 16, 32]
             except Exception as e:
@@ -87,21 +82,21 @@ def render_prediction_form(df: pd.DataFrame, dataset_loader: DatasetLoader) -> O
             ram = st.select_slider("RAM (GB)", options=ram_values)
         
         with col2:
-            product = st.text_input("Product Name", value="Generic Laptop")
+            product = st.text_input("Product Name", value="Your Laptop")
 
-            cpus = safe_get_options('cpu', "Intel Core i5")
+            cpus = safe_get_options('cpu')
             cpu = st.selectbox("CPU", cpus)
 
-            gpus = safe_get_options('gpu', "NVIDIA GeForce")
+            gpus = safe_get_options('gpu')
             gpu = st.selectbox("GPU", gpus)
 
-            operating_systems = safe_get_options('operating_system', "Windows")
+            operating_systems = safe_get_options('operating_system')
             operating_system = st.selectbox("Operating System", operating_systems)
 
             try:
                 weights = safe_get_options('weight', [1.0, 3.0], numeric=True)
-                min_weight = min(weights) if weights and weights[0] != "Not Available" else 1.0
-                max_weight = max(weights) if weights and weights[0] != "Not Available" else 3.0
+                min_weight = min(weights)
+                max_weight = max(weights)
             except Exception:
                 min_weight, max_weight = 1.0, 3.0
                 
@@ -133,10 +128,10 @@ def render_prediction_form(df: pd.DataFrame, dataset_loader: DatasetLoader) -> O
 
         if submitted:
             laptop_spec = create_laptop_spec()
-            return ("predict", laptop_spec)
+            return "predict", laptop_spec
 
         if add_to_comparison:
             laptop_spec = create_laptop_spec()
-            return ("compare", laptop_spec)
+            return "compare", laptop_spec
     
     return None
