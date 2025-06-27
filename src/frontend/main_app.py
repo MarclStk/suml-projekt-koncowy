@@ -103,29 +103,9 @@ def run_app():
     
     if selected_page == "Price Prediction":
         col1, col2 = st.columns([2, 1])
-
-        def show_saved_prediction():
-            if st.session_state.app_state["showing_prediction"] and st.session_state.current_prediction["laptop_spec"]:
-                laptop_spec = st.session_state.current_prediction["laptop_spec"]
-                price_prediction = st.session_state.current_prediction["price_prediction"]
-                category = st.session_state.current_prediction["category"]
-
-                render_prediction_results(price_prediction, category)
-
-                if st.session_state.app_state["recommendations"]:
-                    st.markdown("---")
-                    render_recommendations(st.session_state.app_state["recommendations"], price_prediction.currency)
-                return True
-            return False
         
         with col1:
-            showing_saved = show_saved_prediction()
-
-            form_result = None
-            laptop_spec = None
-
-            if not showing_saved:
-                form_result = render_prediction_form(df, services["dataset_loader"])
+            form_result = render_prediction_form(df, services["dataset_loader"])
 
             if form_result:
                 action, laptop_spec = form_result
