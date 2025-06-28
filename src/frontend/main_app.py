@@ -38,7 +38,7 @@ def initialize_services():
             with st.spinner("Training new model... This may take a moment..."):
                 try:
                     model_info = model_service.find_best_model()
-                    st.toast(f"Model trained successfully! {model_info['model_type']} (R²: {model_info['r2']:.4f})")
+                    st.success(f"Model trained successfully! {model_info['model_type']} (R²: {model_info['r2']:.4f})")
                     st.session_state["model_info"] = model_info
                 except Exception as e:
                     st.error(f"Error training model: {str(e)}")
