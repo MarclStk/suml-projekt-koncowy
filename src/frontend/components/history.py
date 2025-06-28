@@ -46,6 +46,7 @@ def render_history():
             
             st.write(f"Predicted on: {entry.timestamp.strftime('%Y-%m-%d %H:%M')}")
 
-    if st.button("Clear History"):
+    def clear_history_callback():
         st.session_state.prediction_history = []
-        st.experimental_rerun()
+
+    st.button("Clear History", on_click=clear_history_callback, key="clear_history_btn")

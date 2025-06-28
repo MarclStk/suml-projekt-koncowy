@@ -9,9 +9,10 @@ def render_comparison():
 
     if not st.session_state.get("comparison_laptops"):
         st.info("No laptops added for comparison yet. Add laptops from the prediction page first.")
-        if st.button("Go to Price Prediction"):
-            st.session_state.page = "Price Prediction"
-            st.experimental_rerun()
+        def go_to_prediction_callback():
+            st.session_state.app_state["page"] = "Price Prediction"
+        
+        st.button("Go to Price Prediction", on_click=go_to_prediction_callback, key="go_to_prediction_btn")
         return
 
     st.subheader("Selected Laptops")
@@ -72,6 +73,7 @@ def render_comparison():
             })
             st.bar_chart(chart_df.set_index("Laptop"))
 
-    if st.button("Clear Comparison"):
+    def clear_comparison_callback():
         st.session_state.comparison_laptops = []
-        st.experimental_rerun()
+
+    st.button("Clear Comparison", on_click=clear_comparison_callback, key="clear_comparison_btn")
